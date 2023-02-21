@@ -1,7 +1,7 @@
 # github.com/tiredofit/docker-fusiondirectory
 
 [![GitHub release](https://img.shields.io/github/v/tag/tiredofit/docker-fusiondirectory?style=flat-square)](https://github.com/tiredofit/docker-fusiondirectory/releases/latest)
-[![Build Status](https://img.shields.io/github/workflow/status/tiredofit/docker-fusiondirectory/build?style=flat-square)](https://github.com/tiredofit/docker-fusiondirectory/actions?query=workflow%3Abuild)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/tiredofit/docker-fusiondirectory/main.yml?branch=main&style=flat-square)](https://github.com/tiredofit/docker-fusiondirectory/actions)
 [![Docker Stars](https://img.shields.io/docker/stars/tiredofit/fusiondirectory.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/fusiondirectory/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/tiredofit/fusiondirectory.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/fusiondirectory/)
 [![Become a sponsor](https://img.shields.io/badge/sponsor-tiredofit-181717.svg?logo=github&style=flat-square)](https://github.com/sponsors/tiredofit)
