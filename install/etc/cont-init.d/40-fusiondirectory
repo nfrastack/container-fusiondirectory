@@ -6,6 +6,32 @@ PROCESS_NAME="fusiondirectory"
 
 check_service_initialized init 30-argonaut
 
+cat <<EOF
+
+*************************************************************************************************
+*                                                                                               *
+*                    END OF LIFE NOTICE OCTOBER 09, 2025                                        *
+*                          tiredofit/fusiondirectory                                            *
+*                                                                                               *
+* This image is no longer maintained as of and will not receive updates.                        *
+*                                                                                               *
+* A successor image is available at:                                                            *
+*                                                                                               *
+* Repository | Documentation:                                                                   *
+*   - https://github.com/nfrastack/container-fusiondirectory                                    *
+*                                                                                               *
+* Image Registries:                                                                             *
+*   - https://hub.docker.com/r/nfrastack/fusiondirectory                                        *
+*   - https://github.com/nfrastack/container-moodle/pkgs/container/container-fusiondirectory    *
+*                                                                                               *
+* Please visit https://nfrastack.com for more information.                                      *
+*                                                                                               *
+*************************************************************************************************
+
+EOF
+
+sleep 15
+
 #### Plugin Dependencies Override
 ### Admin Plugins
 ## Audit
