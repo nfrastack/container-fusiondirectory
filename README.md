@@ -38,6 +38,7 @@ This repository will build a container for Fusion Directory](<https://www.fusion
   - [Traefik](https://github.com/nfrastack/container-traefik)
   - [Nginx](https://github.com/jc21/nginx-proxy-manager)
   - [Caddy](https://github.com/caddyserver/caddy)
+
 - Require - Access to an LDAP Server w/ necessary fusiondirectory schemas loaded. - See [openldap-fusiondirectory](https://github.com/nfrastack/container-openldap-fusiondirectory)
 - Optional - Access to a SMTP Server
 
@@ -155,15 +156,14 @@ You must have the appropriate schemas installed in your LDAP server before using
 
 ##### Argonaut | User Reminders Plugin Specific Information
 
-| Parameter                    | Description                                       | Default     |
-| ---------------------------- | ------------------------------------------------- | ----------- |
-| `ENABLE_ARGONAUT`            | Enable Argonaut Server                            | `FALSE`     |
-| `PLUGIN_ARGONAUT`            | Argonaut                                          | `FALSE`     |
-| `PLUGIN_AUDIT`               | Audit Trail                                       | `FALSE`     |
-| `ENABLE_AUDIT_LOG_CLEANUP`   | Enable scheduled Audit Log Cleanups               |             |
-|                              | Default `TRUE` if `PLUGIN_AUDIT` plugin enabled   |             |
-| `AUDIT_LOG_CLEANUP_CRON_EXP` | Cron expression for when to run Audit log cleanup | `0 0 * * *` |
-
+| Parameter                        | Description                                                       | Default     |
+| -------------------------------- | ----------------------------------------------------------------- | ----------- |
+| `ENABLE_ARGONAUT`                | Enable Argonaut Server                                            | `FALSE`     |
+| `PLUGIN_ARGONAUT`                | Argonaut                                                          | `FALSE`     |
+| `PLUGIN_AUDIT`                   | Audit Trail                                                       | `FALSE`     |
+| `ENABLE_AUDIT_LOG_CLEANUP`       | Enable scheduled Audit Log Cleanups                               |             |
+|                                  | Default `TRUE` if `PLUGIN_AUDIT` plugin enabled                   |             |
+| `AUDIT_LOG_CLEANUP_CRON_EXP`     | Cron expression for when to run Audit log cleanup                 | `0 0 * * *` |
 | `PLUGIN_USER_REMINDER`           | Password Expiry                                                   | `FALSE`     |
 | `ENABLE_USER_REMINDER`           | Enable scheduled User Reminder emails                             |             |
 |                                  | Default `TRUE` if `PLUGIN_USER_REMINDER` plugin enabled           |             |
