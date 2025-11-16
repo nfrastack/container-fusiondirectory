@@ -1,0 +1,14 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+SERVICE_NAME="rsyslog"
+
+check_container_initialized
+check_service_initialized init
+liftoff
+
+print_start "Starting Syslog"
+silent exec rsyslogd -n

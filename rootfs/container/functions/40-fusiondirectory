@@ -1,0 +1,241 @@
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+fusiondirectory_configure_application() {
+    create_profile() {
+        local i="${1}"
+        i=$(printf "%02d" $i)
+
+        transform_var file \
+                            LDAP${i}_ADMIN_DN \
+                            LDAP${i}_ADMIN_PASS \
+                            LDAP${i}_BIND_DN \
+                            LDAP${i}_PORT \
+                            LDAP${i}_HOST
+
+        sanity_var LDAP${i}_ADMIN_DN "Admin Distinguished Name"
+        sanity_var LDAP${i}_ADMIN_PASS "Admin Password"
+        sanity_var LDAP${i}_BASE_DN "BaseDN not defined"
+        sanity_var LDAP${i}_HOST "LDAP Hostname"
+        sanity_var LDAP${i}_NAME "Server Name"
+
+        LDAP_ADMIN_PASS=LDAP${i}_ADMIN_PASS
+        LDAP_ADMIN_DN=LDAP${i}_ADMIN_DN
+        LDAP_BASE_DN=LDAP${i}_BASE_DN
+        LDAP_HOST=LDAP${i}_HOST
+        LDAP_NAME=LDAP${i}_NAME
+        LDAP_PORT=LDAP${i}_PORT
+        LDAP_SSL=LDAP${i}_SSL
+        LDAP_TLS=LDAP${i}_TLS
+
+        if [ "${!LDAP_SSL,,}" = "true" ]; then
+            LDAP_SCHEME="ldaps"
+        fi
+
+        if [ "${!LDAP_TLS}" = "" ]; then
+            LDAP_TLS=true
+        fi
+
+        if [ "${!LDAP_PORT}" = "" ]; then
+            if [ "${!LDAP_SSL,,}" = "true" ]; then
+                LDAP_PORT=636
+            else
+                LDAP_PORT=389
+            fi
+        fi
+
+        if [ "${!LDAP_HOST}" != "" ]; then
+            cat <<EOF | silent tee -a "${FUSIONDIRECTORY_CONFIG_PATH%/}"/"${FUSIONDIRECTORY_CONFIG_FILE}"
+
+  <location name="${!LDAP_NAME}" ldapTLS="${!LDAP_TLS,,}">
+      <referral URI='${LDAP_SCHEME,,}://${!LDAP_HOST}:${!LDAP_PORT}/${!LDAP_BASE_DN}'
+         adminDn="${!LDAP_ADMIN_DN}"
+         adminPassword="${!LDAP_ADMIN_PASS}" />
+  </location>
+EOF
+    fi
+}
+
+    if [ "${FUSIONDIRECTORY_SETUP_MODE,,}" = "auto" ] ; then
+        transform_var file \
+                            LDAP01_NAME
+        sanity_var LDAP01_NAME "Server Name"
+
+        LDAP_DEFAULT=${LDAP_DEFAULT:-${LDAP01_NAME}}
+        cat <<EOF | silent tee "${FUSIONDIRECTORY_CONFIG_PATH%/}"/"${FUSIONDIRECTORY_CONFIG_FILE}"
+<?xml version="1.0"?>
+<conf>
+  <main default="${LDAP_DEFAULT}"
+    logging="TRUE"
+    displayErrors="${DEBUG_MODE,,}"
+    forceSSL="FALSE"
+    templateCompileDirectory="/var/spool/fusiondirectory/"
+    debugLevel="0"
+  >
+EOF
+        floop "$(set -o posix ; set | grep -c '^LDAP[0-9][0-9]*_NAME')" create_profile EMAN_PADL
+        cat <<EOF | silent tee -a "${FUSIONDIRECTORY_CONFIG_PATH%/}"/"${FUSIONDIRECTORY_CONFIG_FILE}"
+  </main>
+</conf>
+EOF
+
+        chmod 640 "${FUSIONDIRECTORY_CONFIG_PATH%/}"/"${FUSIONDIRECTORY_CONFIG_FILE}"
+        chown root:"${NGINX_GROUP}" "${FUSIONDIRECTORY_CONFIG_PATH%/}"/"${FUSIONDIRECTORY_CONFIG_FILE}"
+    else
+        print_notice "Manual Mode Activated"
+    fi
+}
+
+fusiondirectory_configure_ldap_client() {
+    ### Set some LDAP and Argonaut Configuration Files regardless if Argonaut Server Started for Cleaning Audit Dir
+    cat <<EOF | silent tee /etc/openldap/ldap.conf
+    # LDAP Settings
+
+    BASE ${LDAP01_BASE_DN}
+    URI ${LDAP_SCHEME,,}://${LDAP01_HOST}:${LDAP01_PORT}
+    BINDDN ${LDAP01_ADMIN_DN}
+    BINDPW ${LDAP01_ADMIN_PASS}
+EOF
+    chmod 0600 /etc/openldap/ldap.conf
+    ln -s /etc/openldap /etc/ldap
+
+    cat <<EOF | silent tee /etc/argonaut/argonaut.conf
+[server]
+server_ip   = 127.0.0.1
+
+
+[client]
+client_ip  = 127.0.0.1
+
+[ldap]
+config   = /etc/openldap/ldap.conf
+dn       = ${LDAP01_ADMIN_DN}
+password = ${LDAP01_ADMIN_PASS}
+EOF
+
+    if [ "${LDAP_SCHEME,,}" = "ldaps" ]; then
+        echo 'tls      = on' silent tee -a /etc/argonaut/argonaut.conf
+    fi
+}
+
+fusiondirectory_configure_plugins() {
+    enabled_plugins=()
+    for env in $(set -o posix; set | grep '^PLUGIN_.*=' | grep -i '=true'); do
+        plugin_name="${env%%=*}"
+        plugin_name="${plugin_name#PLUGIN_}"
+        plugin_name="${plugin_name,,}"
+        enabled_plugins+=("$plugin_name")
+    done
+
+    for plugin in "${enabled_plugins[@]}"; do
+        case "${plugin}" in
+            argonaut | autofs | autofs5 | dhcp | dns | fusioninventory | gpg | ipam | ipmi | kerberos | kopano | repository | samba | quota )
+                export PLUGIN_SYSTEMS=true
+            ;;
+            audit )
+                export PLUGIN_ARGONAUT=TRUE
+                ENABLE_AUDIT_CLEANUP=${ENABLE_AUDIT_CLEANUP:-"TRUE"}
+                AUDIT_CLEANUP_CRON_EXP=${AUDIT_CLEANUP_CRON_EXP:-"0 0 * * *"}
+
+                if var_true "${ENABLE_AUDIT_CLEANUP}}"; then
+                    print_notice "Setting Audit Cleanup Scheduled Task"
+                    echo "${AUDIT_CLEANUP_CRON_EXP}  TZ=${TIMEZONE} /usr/sbin/argonaut-clean-audit >/dev/null 2>&1" | silent tee /container/cron/argonaut-audit-cleanup
+                fi
+            ;;
+            cyrus | dovecot | migration_mailrouting | postfix | sogo | spamassassin )
+                export PLUGIN_MAIL=true
+                export PLUGIN_SYSTEMS=true
+            ;;
+            fai)
+                export PLUGIN_ARGONAUT=true
+                export PLUGIN_SYSTEMS=true
+            ;;
+            nextcloud )
+                cat <<EOF | silent tee /container/data/fusiondirectory/plugins/nextcloud/personal/nextcloud/main.inc
+<?php
+    nextcloudAccount::mainInc('nextcloudAccount', \$ui->dn);
+?>
+EOF
+            ;;
+            sympa)
+                export PLUGIN_ALIAS=true
+            ;;
+            opsi)
+                export PLUGIN_ARGONAUT=true
+                export PLUGIN_DNS=true
+                export PLUGIN_SAMBA=true
+                export PLUGIN_SYSTEMS=true
+            ;;
+            rest | webservice )
+                update_template /etc/nginx/sites.available/rest.template \
+                                                                            NGINX_LOG_ACCESS_LOCATION \
+                                                                            NGINX_LOG_ERROR_LOCATION
+                sed -i \
+                            -e "/include \/etc\/nginx\/sites.available\/rest.template;/d" \
+                            -e "/### Includes/a\ \ \ \ \ \ include \/etc\/nginx\/sites.available\/rest.template;" \
+                        /etc/nginx/sites.available/"${FUSIONDIRECTORY_CONFIG_FILE}"
+            ;;
+            systems )
+                export PLUGIN_ARGONAUT=true
+                export PLUGIN_DNS=true
+            ;;
+            user_reminder )
+                export PLUGIN_ARGONAUT=TRUE
+                ENABLE_USER_REMINDER=${ENABLE_USER_REMINDER:-"TRUE"}
+                USER_REMINDER_CRON_EXP=${USER_REMINDER_CRON_EXP:-"0 0 * * *"}
+
+                if var_true "${ENABLE_USER_REMINDER}"; then
+                    print_notice "Setting User Reminder Scheduled Task"
+                    echo "${USER_REMINDER_CRON_EXP}  TZ=${TIMEZONE} /usr/sbin/argonaut-user-reminder >/dev/null 2>&1" | silent tee /container/cron/argonaut-user-reminder
+                fi
+            ;;
+        esac
+    done
+
+    enabled_plugins=()
+    for env in $(set -o posix; set | grep '^PLUGIN_.*=' | grep -i '=true'); do
+        plugin_name="${env%%=*}"
+        plugin_name="${plugin_name#PLUGIN_}"
+        plugin_name="${plugin_name,,}"
+        enabled_plugins+=("$plugin_name")
+    done
+
+    for plugin in "${enabled_plugins[@]}"; do
+        plugin_subdir="${plugin//_/-}"
+        custom_dir="${FUSIONDIRECTORY_PLUGIN_CUSTOM_PATH%/}/${plugin_subdir}"
+        default_dir="${FUSIONDIRECTORY_PLUGIN_PATH%/}/${plugin_subdir}"
+        if [ -d "${custom_dir}" ]; then
+            plugin_dir="${custom_dir}"
+        elif [ -d "${default_dir}" ]; then
+            plugin_dir="${default_dir}"
+        else
+            continue
+        fi
+        print_debug "Installing plugin '${plugin}' from '${plugin_dir}'"
+        if [ -d "${plugin_dir}"/addons ]; then cp -aR "${plugin_dir}"/addons "${NGINX_WEBROOT%/}"/plugins/ ; fi
+        if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin "${NGINX_WEBROOT%/}"/plugins/ ; fi
+        if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config "${NGINX_WEBROOT%/}"/plugins/ ; fi
+        if [ -d "${plugin_dir}"/personal ]; then cp -aR "${plugin_dir}"/personal "${NGINX_WEBROOT%/}"/plugins/ ; fi
+        if [ -d "${plugin_dir}"/html ]; then cp -aR "${plugin_dir}"/html "${NGINX_WEBROOT%/}"/ ; fi
+        if [ -d "${plugin_dir}"/ihtml ]; then cp -aR "${plugin_dir}"/ihtml "${NGINX_WEBROOT%/}"/ ; fi
+        if [ -d "${plugin_dir}"/include ]; then cp -aR "${plugin_dir}"/include "${NGINX_WEBROOT%/}"/ ; fi
+        if [ -d "${plugin_dir}"/locale ]; then
+            mkdir -p "${NGINX_WEBROOT%/}"/locale/plugins/"${plugin_subdir}"
+            cp -aR "${plugin_dir}"/locale "${NGINX_WEBROOT%/}"/locale/"${plugin_subdir}"/
+        fi
+        if [ -d "${plugin_dir}"/contrib/openldap ]; then cp -aR "${plugin_dir}"/contrib/openldap "${NGINX_WEBROOT%/}"/contrib/ ; fi
+        if [ -d "${plugin_dir}"/contrib/etc ]; then cp -aR "${plugin_dir}"/contrib/etc/* "${FUSIONDIRECTORY_CONFIG_PATH%/}"/ ; fi
+    done
+}
+
+fusiondirectory_configure_overrides() {
+    custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
+    custom_scripts
+}
+
+fusiondirectory_configure_webroot() {
+    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-config --update-cache
+    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars --check-directories --update-locales --update-cache
+    silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars
+}

@@ -1,12 +1,14 @@
 #!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-source /assets/functions/00-container
-prepare_service single
-PROCESS_NAME="argonaut"
+source /container/base/functions/container/init
+SERVICE_NAME="argonaut"
+prepare_service
 
 check_service_initialized init 20-php-fpm
 
-#### Disable or Enable Argonaut Server from Starting
 if var_true "${ENABLE_ARGONAUT}" ;  then
     print_notice "Enabling Argonaut Server"
 else

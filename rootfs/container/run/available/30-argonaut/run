@@ -1,0 +1,14 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+SERVICE_NAME="argonaut"
+prepare_service single
+
+check_container_initialized
+check_service_initialized init
+
+print_start "Starting Argonaut Server $(grep -o "ADD: Argonaut .* |" /container/build/${IMAGE_NAME/\//_}/build.log | awk '{print $3}')"
+exec argonaut-server

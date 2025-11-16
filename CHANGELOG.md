@@ -1,7 +1,9 @@
-## 1.4-2.8.99 2025-11-12 <dave at tiredofit dot ca>
+## 1.5-3.0.0pre 2025-11-12 <code at nfrastack dot com>
 
-Add EOL notice and deprecate image
-
+   ### Changed
+      - Switch base image to nfrastack/nginx-php-fpm:7.4
+      - Argonaut 1.4
+      - FusionDirectory 1.5
 
 ## 1.4-2.8.4 2023-12-05 <dave at tiredofit dot ca>
 
@@ -352,7 +354,7 @@ e.g LDAP1_HOST -> LDAP01_HOST
 
 ## 1.15 2019-03-14 <dave at tiredofit dot ca>
 
-* Remove duplicate container init script 
+* Remove duplicate container init script
 
 ## 1.14 2019-03-12 <credit to michalekj at github>
 
@@ -384,7 +386,7 @@ e.g LDAP1_HOST -> LDAP01_HOST
 
 ## 1.82 2018-07-21 <dave at tiredofit dot ca>
 
-* Allowed capability of turning off and on Audit Cleanup and defining time 
+* Allowed capability of turning off and on Audit Cleanup and defining time
 
 ## 1.81 2018-07-18 <dave at tiredofit dot ca>
 
@@ -393,7 +395,7 @@ e.g LDAP1_HOST -> LDAP01_HOST
 ## 1.8 2018-07-18 <dave at tiredofit dot ca>
 
 * Tweak Argonaut and LDAP configuration files to allow for argoaut-clean-audit to work properly
-    
+
 ## 1.7 2018-06-12 <dave at tiredofit dot ca>
 
 * FusionDirectory 1.2.1
@@ -403,7 +405,7 @@ e.g LDAP1_HOST -> LDAP01_HOST
 * Add LLNG Authentication Support
 
 ## 1.51 2018-03-12 <dave at tiredofit dot ca>
-	
+
 * Inject 1.3-dev code for Displaying Groups of Groups
 
 ## 1.5 2018-02-01 <dave at tiredofit dot ca>

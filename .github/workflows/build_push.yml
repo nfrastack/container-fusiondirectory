@@ -1,0 +1,23 @@
+name: "PUSH - Build on repository Push"
+on:
+  push:
+    paths:
+      - '**'
+      - '!/CHANGELOG.md'
+      - '!/examples/*'
+      - '!LICENSE'
+      - '!README.md'
+      - '!/zabbix_templates/*'
+jobs:
+  prepare:
+    uses: nfrastack/gha/.github/workflows/artifacts-encrypt.yml@main
+    secrets: inherit
+  build:
+    needs: prepare
+    uses: ./.github/workflows/image_build.yml
+    secrets: inherit
+  cleanup:
+    needs: [build]
+    uses: nfrastack/gha/.github/workflows/artifacts-remove.yml@main
+    secrets: inherit
+

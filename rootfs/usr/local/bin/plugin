@@ -1,0 +1,22 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/defaults/40-fusiondirectory
+
+echo "*** Core Plugins Available: '${FUSIONDIRECTORY_PLUGIN_PATH}'"
+find "${FUSIONDIRECTORY_PLUGIN_PATH}" -mindepth 1 -maxdepth 1 -type d | \
+    xargs -n1 basename | \
+    grep -v '^\.' | \
+    sed -e 's|-|_|g' | \
+    tr '[:lower:]' '[:upper:]' | \
+    sort -u
+
+echo "*** Custom Plugins Available: '${FUSIONDIRECTORY_PLUGIN_CUSTOM_PATH}'"
+find "${FUSIONDIRECTORY_PLUGIN_CUSTOM_PATH}" -mindepth 1 -maxdepth 1 -type d | \
+    xargs -n1 basename | \
+    grep -v '^\.' | \
+    sed -e 's|-|_|g' | \
+    tr '[:lower:]' '[:upper:]' | \
+    sort -u

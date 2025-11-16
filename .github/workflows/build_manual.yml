@@ -1,0 +1,21 @@
+name: "MANUAL - Build all images"
+
+on:
+  workflow_dispatch:
+    inputs:
+      Manual_Build:
+        description: 'Manual Build'
+        required: false
+
+jobs:
+  prepare:
+    uses: nfrastack/gha/.github/workflows/artifacts-encrypt.yml@main
+    secrets: inherit
+  build:
+    needs: prepare
+    uses: ./.github/workflows/image_build.yml
+    secrets: inherit
+  cleanup:
+    needs: [build]
+    uses: nfrastack/gha/.github/workflows/artifacts-remove.yml@main
+    secrets: inherit

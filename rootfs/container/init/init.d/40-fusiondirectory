@@ -1,0 +1,20 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+SERVICE_NAME="fusiondirectory"
+
+prepare_service
+#check_service_initialized init 30-argonaut
+
+fusiondirectory_configure_application
+fusiondirectory_configure_plugins
+fusiondirectory_configure_webroot
+fusiondirectory_configure_ldap_client
+fusiondirectory_configure_overrides
+
+#chown -R "${NGINX_USER}":"${NGINX_GRROUP}" "${NGINX_WEBROOT}"
+
+liftoff

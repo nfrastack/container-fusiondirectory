@@ -1,0 +1,5 @@
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+ENABLE_ARGONAUT=${ENABLE_ARGONAUT:-"FALSE"}

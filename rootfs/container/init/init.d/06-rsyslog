@@ -1,0 +1,24 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+prepare_service 06-rsyslog
+prepare_service 40-fusiondirectory
+SERVICE_NAME="rsyslog"
+
+if [ "${FUSIONDIRECTORY_LOG_TYPE,,}" = "console" ] ;  then
+    print_warn "Disabling Syslog"
+    service_stop "$(basename "$0")"
+else
+    create_folder "${FUSIONDIRECTORY_LOG_PATH}" "${NGINX_USER}:${NGINX_GROUP}" 750
+    create_logrotate fusiondirectory "${FUSIONDIRECTORY_LOG_PATH%/}"/"${FUSIONDIRECTORY_LOG_FILE}" fusiondirectory "${NGINX_USER}" "${NGINX_GROUP}"
+    update_template /etc/rsyslog.conf \
+                                        FUSIONDIRECTORY_LOG_FILE \
+                                        FUSIONDIRECTORY_LOG_PATH \
+                                        NGINX_USER \
+                                        NGINX_GROUP
+fi
+
+liftoff
