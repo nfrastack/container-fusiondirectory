@@ -53,6 +53,7 @@ ENV \
     PHP_MODULE_ENABLE_IMAP=TRUE \
     PHP_MODULE_ENABLE_LDAP=TRUE \
     PHP_MODULE_ENABLE_POSIX=TRUE \
+    PHP_MODULE_ENABLE_YAML=TRUE \
     IMAGE_NAME="nfrastack/fusiondirectory" \
     IMAGE_REPO_URL="https://github.com/nfrastack/container-fusiondirectory/"
 
@@ -149,16 +150,21 @@ RUN echo "" && \
     container_build_log add "FusionDirectory" "${FUSIONDIRECTORY_VERSION#fusiondirectory-}" "${FUSIONDIRECTORY_REPO_URL}" && \
     clone_git_repo "${FUSIONDIRECTORY_PLUGINS_REPO_URL}" "${FUSIONDIRECTORY_PLUGINS_VERSION}" /container/data/fusiondirectory/plugins && \
     container_build_log add "FusionDirectory Plugins" "${FUSIONDIRECTORY_PLUGINS_VERSION#fusiondirectory-}" "${FUSIONDIRECTORY_PLUGINS_REPO_URL}" && \
-    container_build_log add "FusionDirectory Kopano Plugin" "main" "https://github.com/tiredofit/fusiondirectory-plugin-kopano" && \
+    rm -rf "${GIT_REPO_SRC_FUSIONDIRECTORY_PLUGINS%/}"/.git && \
     clone_git_repo https://github.com/tiredofit/fusiondirectory-plugin-kopano main /usr/src/fusiondirectory-plugin-kopano && \
     cp -R /usr/src/fusiondirectory-plugin-kopano/kopano /container/data/fusiondirectory/plugins/ && \
+    container_build_log add "FusionDirectory Kopano Plugin" "main" "https://github.com/tiredofit/fusiondirectory-plugin-kopano" && \
     clone_git_repo https://github.com/slangdaddy/fusiondirectory-plugin-nextcloud master /usr/src/fusiondirectory-plugin-nextcloud && \
-    rm -rf /usr/src/fusiondirectory-plugin-nextcloud/src/DEBIAN && \
+    rm -rf \
+            "${GIT_REPO_SRC_FUSIONDIRECTORY_PLUGINS_NEXTCLOUD%/}"/.git \
+            "${GIT_REPO_SRC_FUSIONDIRECTORY_PLUGINS_NEXTCLOUD%/}"/src/DEBIAN && \
     mkdir -p /container/data/fusiondirectory/plugins/nextcloud && \
     cp -R /usr/src/fusiondirectory-plugin-nextcloud/src/* /container/data/fusiondirectory/plugins/nextcloud/ && \
     container_build_log add "FusionDirectory Nextcloud Plugin Schema" "master" "https://github.com/slangdaddy/fusiondirectory-plugin-nextcloud" && \
     clone_git_repo https://github.com/gallak/fusiondirectory-plugins-seafile master /usr/src/fusiondirectory-plugins-seafile && \
-    rm -rf /usr/src/fusiondirectory-plugins-seafile/README.md && \
+    rm -rf \
+            "${GIT_REPO_SRC_FUSIONDIRECTORY_PLUGINS_SEALFILE%/}"/.git \
+            "${GIT_REPO_SRC_FUSIONDIRECTORY_PLUGINS_SEALFILE%/}"/README.md && \
     mkdir -p /container/data/fusiondirectory/plugins/seafile && \
     cp -R /usr/src/fusiondirectory-plugins-seafile/* /container/data/fusiondirectory/plugins/seafile/ && \
     container_build_log add "FusionDirectory Seafile Plugin Schema" "main" "https://github.com/gallak/fusiondirectory-plugins-seafile" && \
@@ -171,6 +177,8 @@ RUN echo "" && \
     cp -aR "${GIT_REPO_SRC_FUSIONDIRECTORY_TOOLS%/}"/src/FusionDirectory/Tools /usr/share/php/FusionDirectory/FusionDirectory/ && \
     container_build_log add "FusionDirectory Tools" "${FUSIONDIRECTORY_TOOLS_VERSION}" "${FUSIONDIRECTORY_TOOLS_REPO_URL}" && \
     clone_git_repo "${FUSIONDIRECTORY_ORCHESTRATOR_REPO_URL}" "${FUSIONDIRECTORY_ORCHESTRATOR_VERSION}" /usr/share/fusiondirectory-orchestrator && \
+    rm -rf \
+            "${GIT_REPO_SRC_FUSIONDIRECTORY_ORCHESTRATOR%/}"/.git && \
     container_build_log add "FusionDirectory Orchestrator" "${FUSIONDIRECTORY_ORCHESTRATOR_VERSION}" "${FUSIONDIRECTORY_ORCHESTRATOR_REPO_URL}" && \
     clone_git_repo "${SCHEMA2LDIF_REPO_URL}" "${SCHEMA2LDIF_VERSION}" && \
     cp -aR "${GIT_REPO_SRC_SCHEMA2LDIF%/}"/bin/* /usr/local/bin/ && \
