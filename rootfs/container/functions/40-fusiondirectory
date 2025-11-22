@@ -237,6 +237,10 @@ EOF
         if [ -d "${plugin_dir}"/contrib/openldap ]; then cp -aR "${plugin_dir}"/contrib/openldap "${NGINX_WEBROOT%/}"/contrib/ ; fi
         if [ -d "${plugin_dir}"/contrib/etc ]; then cp -aR "${plugin_dir}"/contrib/etc/* "${FUSIONDIRECTORY_CONFIG_PATH%/}"/ ; fi
     done
+
+    if var_false "${PLUGIN_SUBSCRIPTION}"; then
+        rm -rf "${NGINX_WEBROOT%/}"/plugins/configuration/core/class_licenceInfo.inc
+    fi
 }
 
 fusiondirectory_configure_overrides() {
