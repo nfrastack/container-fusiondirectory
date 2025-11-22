@@ -217,9 +217,10 @@ EOF
           # $this->copyDirectory($pluginPath->getPathname() . '/contrib/yaml', $this->vars['fd_config_dir'] . '/yaml/' . $pluginInfo['information']['name'] . '/');
           # Historical - retro compatibility
         print_debug "Installing plugin '${plugin}' from '${plugin_dir}'"
+        if [ -d "${NGINX_WEBROOT%/}"/plugins/configuration/backend/ ] ; then mkdir -p "${NGINX_WEBROOT%/}"/plugins/configuration/backend ; fi
         if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin/* "${NGINX_WEBROOT%/}"/plugins/management/ ; fi
         if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/backend/ ; fi
-        if [ -d "${plugin_dir}"/backend ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/ ; fi
+        if [ -d "${plugin_dir}"/backend ]; then cp -aR "${plugin_dir}"/backend "${NGINX_WEBROOT%/}"/plugins/configuration/ ; fi
         for plugin_subfolder in addons export generic management personal workflow; do
             if [ -d "${plugin_dir}"/"${plugin_subfolder}" ]; then
                 cp -aR "${plugin_dir}"/"${plugin_subfolder}" "${NGINX_WEBROOT%/}"/plugins/
