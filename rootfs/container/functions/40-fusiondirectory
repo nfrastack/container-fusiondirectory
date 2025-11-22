@@ -222,7 +222,7 @@ EOF
         if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin/* "${NGINX_WEBROOT%/}"/plugins/management/ ; fi
         if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/backend/ ; fi
         if [ -d "${plugin_dir}"/backend ]; then cp -aR "${plugin_dir}"/backend "${NGINX_WEBROOT%/}"/plugins/configuration/ ; fi
-        for plugin_subfolder in addons export generic management personal workflow; do
+        for plugin_subfolder in addons export generic management personal reports workflow; do
             if [ -d "${plugin_dir}"/"${plugin_subfolder}" ]; then
                 cp -aR "${plugin_dir}"/"${plugin_subfolder}" "${NGINX_WEBROOT%/}"/plugins/
             fi
