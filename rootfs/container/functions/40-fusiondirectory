@@ -212,17 +212,25 @@ EOF
         else
             continue
         fi
+          # Note from Source
+        # YAML description must be saved within : /etc/fusiondirectory/yaml/plugin_name/description.yaml
+          # $this->copyDirectory($pluginPath->getPathname() . '/contrib/yaml', $this->vars['fd_config_dir'] . '/yaml/' . $pluginInfo['information']['name'] . '/');
+          # Historical - retro compatibility
         print_debug "Installing plugin '${plugin}' from '${plugin_dir}'"
-        if [ -d "${plugin_dir}"/addons ]; then cp -aR "${plugin_dir}"/addons "${NGINX_WEBROOT%/}"/plugins/ ; fi
-        if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin "${NGINX_WEBROOT%/}"/plugins/ ; fi
-        if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config "${NGINX_WEBROOT%/}"/plugins/ ; fi
-        if [ -d "${plugin_dir}"/personal ]; then cp -aR "${plugin_dir}"/personal "${NGINX_WEBROOT%/}"/plugins/ ; fi
+        if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin/* "${NGINX_WEBROOT%/}"/plugins/management/ ; fi
+        if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/backend/ ; fi
+        if [ -d "${plugin_dir}"/backend ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/ ; fi
+        for plugin_subfolder in addons export generic management personal workflow; do
+            if [ -d "${plugin_dir}"/"${plugin_subfolder}" ]; then
+                cp -aR "${plugin_dir}"/"${plugin_subfolder}" "${NGINX_WEBROOT%/}"/plugins/
+            fi
+        done
         if [ -d "${plugin_dir}"/html ]; then cp -aR "${plugin_dir}"/html "${NGINX_WEBROOT%/}"/ ; fi
         if [ -d "${plugin_dir}"/ihtml ]; then cp -aR "${plugin_dir}"/ihtml "${NGINX_WEBROOT%/}"/ ; fi
         if [ -d "${plugin_dir}"/include ]; then cp -aR "${plugin_dir}"/include "${NGINX_WEBROOT%/}"/ ; fi
         if [ -d "${plugin_dir}"/locale ]; then
             mkdir -p "${NGINX_WEBROOT%/}"/locale/plugins/"${plugin_subdir}"
-            cp -aR "${plugin_dir}"/locale "${NGINX_WEBROOT%/}"/locale/"${plugin_subdir}"/
+            cp -aR "${plugin_dir}"/locale "${NGINX_WEBROOT%/}"/locale/plugins/"${plugin_subdir}"/
         fi
         if [ -d "${plugin_dir}"/contrib/openldap ]; then cp -aR "${plugin_dir}"/contrib/openldap "${NGINX_WEBROOT%/}"/contrib/ ; fi
         if [ -d "${plugin_dir}"/contrib/etc ]; then cp -aR "${plugin_dir}"/contrib/etc/* "${FUSIONDIRECTORY_CONFIG_PATH%/}"/ ; fi
