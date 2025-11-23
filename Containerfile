@@ -216,8 +216,7 @@ RUN echo "" && \
     cp -R /usr/src/fusiondirectory/* "${NGINX_WEBROOT}" && \
     fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars --yes && \
     touch /etc/debian_version && \
-    yes Yes | fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-directories --update-cache && \
-    fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --update-locales --update-cache --yes && \
+    yes Yes | fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-directories --update-cache --update-locales --yes && \
     \
     package remove \
                     ARGONAUT_BUILD_DEPS \
