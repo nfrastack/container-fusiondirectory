@@ -214,10 +214,7 @@ EOF
         else
             continue
         fi
-          # Note from Source
-        # YAML description must be saved within : /etc/fusiondirectory/yaml/plugin_name/description.yaml
-          # $this->copyDirectory($pluginPath->getPathname() . '/contrib/yaml', $this->vars['fd_config_dir'] . '/yaml/' . $pluginInfo['information']['name'] . '/');
-          # Historical - retro compatibility
+
         print_debug "Installing plugin '${plugin}' from '${plugin_dir}'"
         if [ -d "${plugin_dir}"/admin ]; then cp -aR "${plugin_dir}"/admin/* "${NGINX_WEBROOT%/}"/plugins/management/ ; fi
         if [ -d "${plugin_dir}"/config ]; then cp -aR "${plugin_dir}"/config/* "${NGINX_WEBROOT%/}"/plugins/configuration/backend/ ; fi
@@ -252,4 +249,24 @@ fusiondirectory_configure_webroot() {
     yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-config --update-cache
     yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars --check-directories --update-locales --update-cache
     silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars
+}
+
+fusiondirectory_configure_orchestrator() {
+    if var_true "${ENABLE_ORCHESTRATOR}"; then
+        print_notice "Configuring FusionDirectory Orchestrator"
+        create_folder "${ORCHESTRATOR_CONFIG_PATH}" "${NGINX_USER}":"${NGINX_GROUP}" 600
+
+        if [ "${ORCHESTRATOR_SETUP_MODE,,}" = "auto" ] ; then
+            # Do the thing
+            :
+        fi
+
+        update_template /etc/nginx/sites.available/orchestrator.template \
+                                                                            NGINX_LOG_ACCESS_LOCATION \
+                                                                            NGINX_LOG_ERROR_LOCATION
+        sed -i \
+                    -e "/include \/etc\/nginx\/sites.available\/orchestrator.template;/d" \
+                    -e "/### Includes/a\ \ \ \ \ \ include \/etc\/nginx\/sites.available\/orchestrator.template;" \
+                /etc/nginx/sites.available/"${FUSIONDIRECTORY_CONFIG_FILE}"
+    fi
 }

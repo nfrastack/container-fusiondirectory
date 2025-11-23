@@ -1,0 +1,17 @@
+location /orchestrator/ {
+    access_log  {{NGINX_LOG_ACCESS_LOCATION}}/orchestrator-access.log;
+    error_log   {{NGINX_LOG_ERROR_LOCATION}}/orchestrator-error.log;
+
+    alias /usr/share/fusiondirectory-orchestrator/;
+    try_files $uri $uri/ =404;
+
+    location ~ ^/orchestrator/.*\.php$ {
+        alias /usr/share/fusiondirectory-orchestrator/;
+        #include /etc/nginx/snippets/server.available/php-fpm/{{PHP_POOL}}.conf;
+        fastcgi_split_path_info       ^(.+\.php)(/.+)$;
+        fastcgi_param PATH_INFO       $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
