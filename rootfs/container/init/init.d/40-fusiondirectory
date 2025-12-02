@@ -11,6 +11,7 @@ prepare_service
 
 fusiondirectory_configure_application
 fusiondirectory_configure_orchestrator
+fusiondirectory_configure_themes
 fusiondirectory_configure_plugins
 fusiondirectory_configure_webroot
 fusiondirectory_configure_ldap_client

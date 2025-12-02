@@ -240,17 +240,6 @@ EOF
     fi
 }
 
-fusiondirectory_configure_overrides() {
-    custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
-    custom_scripts
-}
-
-fusiondirectory_configure_webroot() {
-    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-config --update-cache
-    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars --check-directories --update-locales --update-cache
-    silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars
-}
-
 fusiondirectory_configure_orchestrator() {
     if var_true "${ENABLE_ORCHESTRATOR}"; then
         print_notice "Configuring FusionDirectory Orchestrator"
@@ -270,3 +259,32 @@ fusiondirectory_configure_orchestrator() {
                 /etc/nginx/sites.available/"${FUSIONDIRECTORY_CONFIG_FILE}"
     fi
 }
+
+fusiondirectory_configure_overrides() {
+    custom_files "${CONTAINER_CUSTOM_PATH}" "${NGINX_WEBROOT}" "${NGINX_USER}" "${NGINX_GROUP}"
+    custom_scripts
+}
+
+fusiondirectory_configure_themes() {
+    for tvar in $(set -o posix; env | grep '^THEME_.*_PATH=.*$' | awk -F= '{print $1}'); do
+        t_name=$(echo "${tvar}" | sed -E 's|^THEME_(.*)_PATH$|\1|' | tr '[:upper:]' '[:lower:]')
+        t_path=$(eval echo "\$${tvar}")
+        if [ -n "${t_name}" ] && [ -n "${t_path}" ]; then
+            if [ -d "${t_path}/html" ]; then
+                mkdir -p "${NGINX_WEBROOT%/}"/html/themes
+                ln -sf "${t_path}/html" "${NGINX_WEBROOT%/}/html/themes/${t_name}"
+            fi
+            if [ -d "${t_path}/ihtml" ]; then
+                mkdir -p "${NGINX_WEBROOT%/}"/ihtml/themes
+                ln -sf "${t_path}/ihtml" "${NGINX_WEBROOT%/}/ihtml/themes/${t_name}"
+            fi
+        fi
+    done
+}
+
+fusiondirectory_configure_webroot() {
+    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --check-config --update-cache
+    yes Yes | silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars --check-directories --update-locales --update-cache
+    silent fusiondirectory-configuration-manager --set-var fd_home="${NGINX_WEBROOT}" --write-vars
+}
+

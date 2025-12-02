@@ -26,6 +26,7 @@ This repository will build a container for Fusion Directory](<https://www.fusion
   - [Connection profiles](#connection-profiles)
   - [Plugins](#plugins)
     - [Argonaut | User Reminders Plugin Specific Information](#argonaut--user-reminders-plugin-specific-information)
+  - [Themes](#themes)
 - [Maintenance](#maintenance)
   - [Shell Access](#shell-access)
 - [Support & Maintenance](#support--maintenance)
@@ -169,7 +170,32 @@ You must have the appropriate schemas installed in your LDAP server before using
 |                                  | Default `TRUE` if `PLUGIN_USER_REMINDER` plugin enabled           |             |
 | `USER_REMINDER_CLEANUP_CRON_EXP` | Cron expression for when to send user reminder emails log cleanup | `0 0 * * *` |
 
+#### Themes
+
+| Parameter                | Description                                                    | Default |
+| ------------------------ | -------------------------------------------------------------- | ------- |
+| `THEME_<THEMENAME>_PATH` | Path to THEMENAME |         |
+
+You can keep custom themes outside the FusionDirectory webroot for easier development and upgrades. For each theme, set an environment variable like:
+
+`THEME_MYTHEME_PATH=/path/to/mytheme`
+
+The theme directory should have this structure:
+
+```text
+mytheme/
+  ├── html/
+  └── ihtml/
+```
+
+The container will automatically create symbolic links:
+- `/www/fusiondirectory/html/themes/mytheme` → `/path/to/mytheme/html`
+- `/www/fusiondirectory/ihtml/themes/mytheme` → `/path/to/mytheme/ihtml`
+
+This keeps your custom themes separate from core files and makes switching or updating themes simple.
+
 * * *
+
 
 ## Maintenance
 
