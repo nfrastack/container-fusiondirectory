@@ -270,14 +270,26 @@ fusiondirectory_configure_themes() {
         t_name=$(echo "${tvar}" | sed -E 's|^THEME_(.*)_PATH$|\1|' | tr '[:upper:]' '[:lower:]')
         t_path=$(eval echo "\$${tvar}")
         if [ -n "${t_name}" ] && [ -n "${t_path}" ]; then
-            if [ -d "${t_path}/html" ]; then
-                mkdir -p "${NGINX_WEBROOT%/}"/html/themes
-                ln -sf "${t_path}/html" "${NGINX_WEBROOT%/}/html/themes/${t_name}"
+            create_folder "${t_path}" "${NGINX_USER}":"${NGINX_GROUP}" 755
+            t_html_path="${NGINX_WEBROOT%/}/html/themes/${t_name}"
+            t_ihtml_path="${NGINX_WEBROOT%/}/ihtml/themes/${t_name}"
+            c_html_path="${t_path}/html"
+            c_ihtml_path="${t_path}/ihtml"
+            if [ -d "${t_html_path}" ]; then
+                if dir_empty "${c_html_path}"; then
+                    cp -aR "${t_html_path}" "${t_path%/}/"
+                fi
+                rm -rf "${t_html_path}"
             fi
-            if [ -d "${t_path}/ihtml" ]; then
-                mkdir -p "${NGINX_WEBROOT%/}"/ihtml/themes
-                ln -sf "${t_path}/ihtml" "${NGINX_WEBROOT%/}/ihtml/themes/${t_name}"
+            ln -sf "${c_html_path}" "${t_html_path}"
+            if [ -d "${t_ihtml_path}" ]; then
+                mkdir -p "${c_ihtml_path}"
+                if dir_empty "${c_html_path}"; then
+                    cp -aR "${t_ihtml_path}" "${t_path%/}/"
+                fi
+                rm -rf "${t_ihtml_path}"
             fi
+            ln -sf "${c_ihtml_path}" "${t_ihtml_path}"
         fi
     done
 }

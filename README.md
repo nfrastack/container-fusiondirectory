@@ -184,15 +184,17 @@ The theme directory should have this structure:
 
 ```text
 mytheme/
-  ├── html/
-  └── ihtml/
+  |-- html/
+  L__ ihtml/
 ```
 
 The container will automatically create symbolic links:
-- `/www/fusiondirectory/html/themes/mytheme` → `/path/to/mytheme/html`
-- `/www/fusiondirectory/ihtml/themes/mytheme` → `/path/to/mytheme/ihtml`
+- `/www/fusiondirectory/html/themes/mytheme` > `/path/to/mytheme/html`
+- `/www/fusiondirectory/ihtml/themes/mytheme` > `/path/to/mytheme/ihtml`
 
 This keeps your custom themes separate from core files and makes switching or updating themes simple.
+
+>> `THEME_BREEZY_PATH` will copy the existing theme to your chosen path if files do not exist and create a symbolic link for development purposes.
 
 * * *
 
